@@ -6,7 +6,7 @@ import { PanelOptions } from './types';
  * Panel Plugin
  */
 export const plugin = new PanelPlugin<PanelOptions>(AbcPanel).setPanelOptions((builder) => {
-  builder.addFieldNamePicker({
+  builder.addTextInput({
     path: 'name',
     name: 'Field name',
     description: 'Name of the field with data.',
