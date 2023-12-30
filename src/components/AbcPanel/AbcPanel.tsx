@@ -1,18 +1,19 @@
 import { css } from '@emotion/css';
-import React,{ useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { PanelProps } from '@grafana/data';
 import { PanelOptions } from '../../types';
 import UplotReact from 'uplot-react';
 import {
   VizLayout,
 } from '@grafana/ui';
-// import uPlot from 'uplot';
-import Select, {ActionMeta, InputActionMeta} from 'react-select'
+import uPlot from 'uplot';
+import Select, { ActionMeta, InputActionMeta, OnChangeValue } from 'react-select'
+import { unstable_batchedUpdates } from 'react-dom';
 
 /**
  * Properties
  */
-interface Props extends PanelProps<PanelOptions> {}
+interface Props extends PanelProps<PanelOptions> { }
 
 // function tooltipPlugin(opts) {
 //   let over, bound, bLeft, bTop;
@@ -118,81 +119,82 @@ export const AbcPanel: React.FC<Props> = ({ options, data, width, height }) => {
       // value: (u: any, v: any) => v == null ? "-" : v+"s",
     },
     {
-      label: data.series[0].fields[1].name+(Math.random() + 1).toString(36).substring(7),
+      label: data.series[0].fields[1].name + (Math.random() + 1).toString(36).substring(7),
       values: (u, sidx, idx) => {
-        if (idx==null)
+        if (idx == null)
           return {
             x: '--',
-            Min: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Max: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Mean: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Sdev: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Value: '--'
-          };
-          return {
-            x: data.series[0].fields[0].values[idx],
-            Min: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Max: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Mean: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Sdev: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Value: Number(data.series[sidx-1].fields[1].values[idx]).toExponential(4)
-          };
-      },
-      stroke: "red",
-    },
-    {
-      label: data.series[1].fields[1].name+(Math.random() + 1).toString(36).substring(7),
-      values: (u, sidx, idx) => {
-        if (idx==null)
-          return {
-            x: '--', 
-            Min: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Max: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Mean: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-            Sdev: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
+            Min: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+            Max: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+            Mean: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+            Sdev: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
             Value: '--'
           };
         return {
           x: data.series[0].fields[0].values[idx],
-          Min: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-          Max: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-          Mean: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-          Sdev: Number(Math.min(... data.series[sidx-1].fields[1].values)).toExponential(4), 
-          Value: Number(data.series[sidx-1].fields[1].values[idx]).toExponential(4)
+          Min: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+          Max: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+          Mean: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+          Sdev: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+          Value: Number(data.series[sidx - 1].fields[1].values[idx]).toExponential(4)
+        };
+      },
+      stroke: "red",
+    },
+    {
+      label: data.series[1].fields[1].name + (Math.random() + 1).toString(36).substring(7),
+      values: (u, sidx, idx) => {
+        if (idx == null)
+          return {
+            x: '--',
+            Min: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+            Max: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+            Mean: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+            Sdev: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+            Value: '--'
+          };
+        return {
+          x: data.series[0].fields[0].values[idx],
+          Min: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+          Max: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+          Mean: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+          Sdev: Number(Math.min(...data.series[sidx - 1].fields[1].values)).toExponential(4),
+          Value: Number(data.series[sidx - 1].fields[1].values[idx]).toExponential(4)
         };
       },
       stroke: "blue",
       // show: false
     },
   ]
-  const brushOpts = {
+
+  const initialBrushOpts = {
     width: width,
-    height: height*0.5,
+    height: height * 0.5,
     // plugins: [
     //   tooltipPlugin(),
     // ],
     legend: {
-        show: true
+      show: true
     },
     cursor: {
+      y: false,
+      points: {
+        show: false,
+      },
+      drag: {
+        setScale: false,
+        x: true,
         y: false,
-        points: {
-            show: false,
-        },
-        drag: {
-            setScale: false,
-            x: true, 
-            y: false,
-        },
-        sync: {
-            key: 'moo',
-            setSeries: true,
-        },
+      },
+      sync: {
+        key: 'moo',
+        setSeries: true,
+      },
     },
     scales: {
-        x: {
-            time: false,
-        },
+      x: {
+        time: false,
+      },
     },
     series: series,
     hooks: {
@@ -212,16 +214,29 @@ export const AbcPanel: React.FC<Props> = ({ options, data, width, height }) => {
             let max = u.posToVal(u.select.left + u.select.width, 'x');
 
             // zoom to selection
-            u.setScale('x', {min, max});
+            u.setScale('x', { min, max });
 
             // reset selection
-            u.setSelect({width: 0, height: 0}, false);
+            u.setSelect({ width: 0, height: 0 }, false);
           }
         }
       ],
+      // addSeries: [
+      //   (u, sidx) => {
+      //     console.log("addSeries" + (u.status == 0 ? " (init)" : ""), sidx);
+      //   }
+      // ],
+      // delSeries: [
+      //   (u, sidx) => {
+      //     console.log("delSeries", sidx);
+      //   }
+      // ],
     }
   }
-  const initialState = useMemo<uPlot.AlignedData>(
+
+  const [brushOpts, setBrushOpts] = useState<any>(initialBrushOpts);
+
+  const initialData1 = useMemo<uPlot.AlignedData>(
     () => [
       data.series[0].fields[0].values,
       data.series[0].fields[1].values,
@@ -229,16 +244,82 @@ export const AbcPanel: React.FC<Props> = ({ options, data, width, height }) => {
     ],
     []
   );
-  const [data1, _] = useState<uPlot.AlignedData>(initialState);
+  const [data1, setData1] = useState<uPlot.AlignedData>(initialData1);
+  const [selectedOption, _] = useState(null);
+  const dropdownoption = [
+    { value: 'add1', label: 'Add 1' },
+    { value: 'add2', label: 'Add 2' },
+  ];
+  
+  const onChange = (
+    newValue: OnChangeValue<any, true>,
+    actionMeta: ActionMeta<any>
+  ) => {
+    if (newValue.value == 'add1') {
+      console.log('selva')
+      const newData1: uPlot.AlignedData = [
+        data.series[0].fields[0].values,
+        data.series[0].fields[1].values,
+        data.series[1].fields[1].values,
+        data.series[1].fields[1].values.map((v,i)=>v*1.2),
+      ];
+      const newBrushOpts = {
+        ...brushOpts,
+        series: [
+          ... series,
+          {
+            label: data.series[0].fields[1].name + (Math.random() + 1).toString(36).substring(7),
+            values: (u, sidx, idx) => {
+              if (idx == null)
+                return {
+                  x: '--',
+                  Min: Number(Math.min(...data.series[sidx - 2].fields[1].values)).toExponential(4),
+                  Max: Number(Math.min(...data.series[sidx - 2].fields[1].values)).toExponential(4),
+                  Mean: Number(Math.min(...data.series[sidx - 2].fields[1].values)).toExponential(4),
+                  Sdev: Number(Math.min(...data.series[sidx - 2].fields[1].values)).toExponential(4),
+                  Value: '--'
+                };
+              return {
+                x: data.series[0].fields[0].values[idx],
+                Min: Number(Math.min(...data.series[sidx - 2].fields[1].values)).toExponential(4),
+                Max: Number(Math.min(...data.series[sidx - 2].fields[1].values)).toExponential(4),
+                Mean: Number(Math.min(...data.series[sidx - 2].fields[1].values)).toExponential(4),
+                Sdev: Number(Math.min(...data.series[sidx - 2].fields[1].values)).toExponential(4),
+                Value: Number(data.series[sidx - 2].fields[1].values[idx]).toExponential(4)
+              };
+            },
+            stroke: "orange",
+          },
 
+        ]
+      };
+      unstable_batchedUpdates(() => {
+        setData1(newData1);
+        setBrushOpts(newBrushOpts);
+      });
+    }
+    // setData1(
+    //   [
+    //   ...data1, 
+    //   data.series[1].fields[1].values
+    //   ]
+    // );
+  };
+
+  let u = new uPlot(brushOpts, data1);
   return (
     <>
-    <VizLayout width={width} height={height}>
+      <Select
+        defaultValue={selectedOption}
+        onChange={onChange}
+        options={dropdownoption}
+      />
+      <VizLayout width={width} height={height}>
         {(vizWidth: number, vizHeight: number) => (
           <UplotReact options={brushOpts} data={data1} />
         )}
       </VizLayout>
-      </>
-    
+    </>
+
   )
 };
